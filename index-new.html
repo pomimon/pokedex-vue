@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pokedex-Vue</title>
+    <style>
+      @font-face {
+        font-family: "VT323";
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url(https://fonts.gstatic.com/s/vt323/v18/pxiKyp0ihIEF2isfFJXUdVNF.woff2) format("woff2");
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+
+      :root {
+        --font-primary: "VT323", monospace;
+        --radius: 6px;
+        --border-width: 2px;
+        --spine-width: 50px;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: inherit;
+      }
+
+      html {
+        box-sizing: border-box;
+      }
+
+      body {
+        align-items: center;
+        display: flex;
+        flex-direction: column;
+        font-family: var(--font-primary);
+        font-size: 1.3rem;
+        justify-content: center;
+        margin: 0;
+        min-height: 100vh;
+        text-transform: capitalize;
+      }
+
+      /*
+        Layout
+      */
+
+      .pokedex {
+        display: flex;
+        flex-direction: column;
+        height: 580px;
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 920px;
+        width: 760px;
+      }
+
+      .pokedex-header {
+        background-color: darkred;
+        border-radius: var(--radius) var(--radius) 0 0;
+        border: var(--border-width) solid black;
+        border-bottom: none;
+        display: flex;
+        height: 60px;
+        padding: 6px;
+        width: calc((100% - var(--spine-width)) / 2 + var(--spine-width));
+      }
+
+      .pokedex-body {
+        background-color: darkred;
+        border-radius: 0 var(--radius) var(--radius) var(--radius);
+        border: var(--border-width) solid black;
+        display: flex;
+        flex: 1;
+        height: 100%;
+      }
+
+      .pokedex-spine {
+        background-color: darkblue;
+        flex: 0 0 var(--spine-width);
+      }
+
+      .panel-left,
+      .panel-right {
+        background-color: darkred;
+        border: var(--border-width) solid black;
+        flex: 1;
+        margin: 6px;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .panel-left {
+        border-radius: var(--radius) var(--radius) 0 var(--radius);
+      }
+
+      .panel-right {
+        border-radius: var(--radius) var(--radius) var(--radius) 0;
+      }
+
+      img {
+        width: 100%;
+        height: auto;
+
+        &.is-pixelated {
+          image-rendering: pixelated;
+        }
+      }
+
+      /*
+        Components
+      */
+
+      .light {
+        --size: 10px;
+
+        background-color: yellow;
+        border-radius: 50%;
+        border: 1px solid black;
+        height: var(--size);
+        width: var(--size);
+
+        &.is-jumbo {
+          --size: 30px;
+        }
+      }
+
+      .dot {
+        --size: 10px;
+
+        background-color: darkred;
+        border: 1px solid black;
+        border-radius: 50%;
+        height: var(--size);
+        gap: 15px;
+        width: var(--size);
+
+        &.is-big {
+          --size: 25px;
+        }
+      }
+
+      .status {
+        display:flex;
+        flex-direction: row;
+      }
+
+      #type-indicator {
+        background-color: blue;
+      }
+
+      #failure-indicator {
+        background-color: red;
+      }
+
+      #loading-indicator {
+        background-color: yellow;
+      }
+
+      #success-indicator {
+        background-color: green;
+      }
+
+      #preview {
+        border-radius: 6px;
+        background-color: lightgray;
+        padding: 12px 18px;
+        margin-bottom: 12px;
+
+        .image {
+          background-color: darkgray;
+          border: 2px solid black;
+          border-radius: var(--radius);
+          /*margin: 0 30px;*/
+          padding: 12px;
+        }
+
+        .bar {
+          display: flex;
+
+          &:first-child {
+            justify-content: center;
+            gap: 6px;
+          }
+
+          &:not(:last-child) {
+            margin-bottom: 6px;
+          }
+        }
+      }
+
+      .d-pad {
+        display: grid;
+        grid-template-columns: repeat(3, 25px);
+        grid-template-rows: repeat(3, 25px);
+        gap: 0;
+        width: fit-content;
+
+        .d-pad-btn {
+          background-color: #222;
+          border: 1px solid #111;
+
+          &.up {
+            grid-column: 2;
+            grid-row: 1;
+            border-radius: 4px 4px 0 0;
+          }
+
+          &.left {
+            grid-column: 1;
+            grid-row: 2;
+            border-radius: 4px 0 0 4px;
+          }
+
+          &.center {
+            grid-column: 2;
+            grid-row: 2;
+          }
+
+          &.right {
+            grid-column: 3;
+            grid-row: 2;
+            border-radius: 0 4px 4px 0;
+          }
+
+          &.down {
+            grid-column: 2;
+            grid-row: 3;
+            border-radius: 0 0 4px 4px;
+          }
+        }
+      }
+
+      .button-pill {
+        background-color: black;
+        border-radius: 20%;
+        height: 15px;
+        width: 40px;
+      }
+
+      .info-box {
+        background-color: paleturquoise;
+        display: inline-flex;
+        flex: 1;
+        padding: 6px;
+      }
+
+      #controls {
+        display: flex;
+        height: 30px;
+        flex: 1;
+
+        .left {
+          flex: 2;
+          display: flex;
+          flex-direction: column;
+          padding: 6px;
+        }
+
+        .button-bar {
+          align-items: center;
+          display: flex;
+          flex-direction: row;
+          gap: 10px;
+        }
+
+        .button {
+          background-color: blue;
+          border-radius: 50%;
+          height: 40px;
+          width: 40px;
+        }
+
+        .button-pill {
+          background-color: red;
+
+          & ~ {
+            background-color: blue;
+          }
+        }
+
+        .info-box {
+          margin-top: 6px;
+        }
+
+        .right {
+          flex: 1;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+        }
+      }
+
+      .box {
+        border-radius: 3px;
+        border: var(--border-width) solid black;
+        padding: 6px;
+      }
+
+      .button-grid {
+        /*display:grid;*/
+        /*grid-template-columns: repeat(2, 25px);*/
+        /*grid-template-rows: repeat(5, 25px);*/
+        /*gap: 0;*/
+        /*width: fit-content;*/
+        /*background-color: yellow;*/
+
+        display: flex;
+        flex-wrap: wrap;
+        border: 1px solid black;
+        border-radius: calc(var(--radius) + 1px);
+        /*overflow: hidden;*/
+
+        .square {
+          background-color: blue;
+          border: 1px solid black;
+          aspect-ratio: 1;
+          flex: 1 0 20%;
+
+          &:nth-child(1) {
+            border-top-left-radius: var(--radius);
+          }
+
+          &:nth-child(5) {
+            border-top-right-radius: var(--radius);
+          }
+
+          &:nth-child(6) {
+            border-bottom-left-radius: var(--radius);
+          }
+
+          &:nth-child(10) {
+            border-bottom-right-radius: var(--radius);
+          }
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="pokedex">
+        <div class="pokedex-header">
+          <div class="light is-jumbo" id="type-indicator"></div>
+          <div class="status">
+            <div class="light" id="failure-indicator"></div>
+            <div class="light" id="loading-indicator"></div>
+            <div class="light" id="success-indicator"></div>
+          </div>
+        </div>
+
+        <div class="pokedex-body">
+          <div class="panel-left">
+            <div id="preview">
+              <div class="bar">
+                <div class="dot"></div>
+                <div class="dot"></div>
+              </div>
+
+              <div class="bar image">
+                <img class="is-pixelated" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/1.gif">
+              </div>
+
+              <div class="bar">
+                <div class="dot is-big"></div>
+              </div>
+            </div>
+
+            <div id="controls">
+              <div class="left">
+                <div class="button-bar">
+                  <div class="button"></div>
+                  <div class="button-pill"></div>
+                  <div class="button-pill"></div>
+                </div>
+                <div class="info-box"></div>
+              </div>
+              <div class="right">
+                <div class="d-pad">
+                  <div class="d-pad-btn up"></div>
+                  <div class="d-pad-btn left"></div>
+                  <div class="d-pad-btn center"></div>
+                  <div class="d-pad-btn right"></div>
+                  <div class="d-pad-btn down"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pokedex-spine">
+            <!-- <div class="space"></div> -->
+            <!-- <div class="hinge"></div> -->
+            <!-- <div class="space"></div> -->
+            <!-- <div class="hinge"></div> -->
+            <!-- <div class="space"></div> -->
+          </div>
+
+          <div class="panel-right">
+            <div class="box">
+              <div class="info-box"></div>
+            </div>
+
+            <div class="box">
+              <div class="button-grid">
+                <div class="square"></div>
+                <div class="square"></div>
+                <div class="square"></div>
+                <div class="square"></div>
+                <div class="square"></div>
+
+                <div class="square"></div>
+                <div class="square"></div>
+                <div class="square"></div>
+                <div class="square"></div>
+                <div class="square"></div>
+              </div>
+            </div>
+
+            <!-- <div class="box"> -->
+              <!-- <div class="button-pill"></div> -->
+              <!-- <div class="button-pill"></div> -->
+            <!-- </div> -->
+
+            <!-- <div class="box"> -->
+              <!-- <div class="buttons"> -->
+                <!-- <div class="button" id="prev-move"></div> -->
+                <!-- <div class="button" id="next-move"></div> -->
+              <!-- </div> -->
+              <!-- <div class="light"></div> -->
+            <!-- </div> -->
+
+            <!-- <div class="box"> -->
+              <!-- <div class="info-box"></div> -->
+              <!-- <div class="info-box"></div> -->
+            <!-- </div> -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
