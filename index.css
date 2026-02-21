@@ -276,8 +276,13 @@ Layout "Components"
     background-color: darkgray;
     border-radius: var(--radius);
     border: var(--border) solid black;
+    display: flex;
     padding: calc(var(--gap) * 2);
     width: 100%;
+
+    img {
+      object-fit: contain;
+    }
   }
 }
 

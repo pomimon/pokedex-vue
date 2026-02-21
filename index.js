@@ -9,6 +9,10 @@ const isValidId = (id) => {
   return id > 0 && id <= MAX_POKEMON;
 };
 
+const IMAGES = {
+  gif: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated",
+}
+
 // =============================================================================
 // Components
 // =============================================================================
@@ -18,6 +22,15 @@ const Pokedex = {
     return {
       pokemon: [],
     };
+  },
+
+  computed: {
+    currentId() {
+      return parseInt(this.$route.params.id, 10);
+    },
+    currentPokemon() {
+      return this.pokemon[this.currentId - 1];
+    },
   },
 
   mounted() {
@@ -32,7 +45,7 @@ const Pokedex = {
 
       <div class="layout-panels">
         <div class="layout-panel lhs">
-          <Preview />
+          <Preview :id="currentId"/>
           <Control />
         </div>
 
@@ -66,6 +79,18 @@ const Header = {
 };
 
 const Preview = {
+  props: {
+    id: {
+      type: Number,
+      required: true,
+      validator: isValidId,
+    },
+  },
+  computed: {
+    imageUrl() {
+      return `${IMAGES.gif}/${this.id}.gif`;
+    },
+  },
   template: `
     <div class="block" id="preview">
       <div class="bar">
@@ -74,7 +99,7 @@ const Preview = {
       </div>
       <div class="bar">
         <div class="image">
-          <img class="is-pixelated" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/1.gif"/>
+          <img class="is-pixelated" :src="imageUrl"/>
         </div>
       </div>
       <div class="bar">
