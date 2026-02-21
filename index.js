@@ -211,7 +211,7 @@ const Evolution = {
     <div class="block" id="evolution">
       <div class="info">
         <div class="poke-group">
-          <div class="image">
+          <div class="image" @click="$root.viewPokemon(pokemon1)">
             <img class="is-pixelated" :src="pokemon1Image">
           </div>
           <p v-text="pokemon1Name"/>
@@ -220,7 +220,7 @@ const Evolution = {
         <div class="arrow"></div>
 
         <div class="poke-group">
-          <div class="image" v-if="pokemon2">
+          <div class="image" v-if="pokemon2" @click="$root.viewPokemon(pokemon2)">
             <img class="is-pixelated" :src="pokemon2Image">
           </div>
           <div class="pokeball" v-else/>
@@ -231,7 +231,7 @@ const Evolution = {
         <div class="arrow"></div>
 
         <div class="poke-group">
-          <div class="image" v-if="pokemon3">
+          <div class="image" v-if="pokemon3" @click="$root.viewPokemon(pokemon3)">
             <img class="is-pixelated" :src="pokemon3Image">
           </div>
           <div class="pokeball" v-else/>
