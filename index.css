@@ -11,13 +11,30 @@
     U+2215, U+FEFF, U+FFFD;
 }
 
+/* ========================================
+Variables
+======================================== */
+
 :root {
-  --font-primary: "VT323", monospace;
+  --gap: 6px;
+
+  --border: 2px;
+  --radius: 6px;
+
+  --dex-height: 580px;
+  --dex-width: 760px;
+
+  --spine: 50px;
+
+  --header-width: calc((100% - var(--spine)) / 2 + var(--spine));
+
+  --background: #eb1717;
+  /*--font-primary: "VT323", monospace;*/
 }
 
-/*
-Root-Level Styles
-*/
+/* ========================================
+Global-ish
+======================================== */
 
 *,
 *::before,
@@ -33,12 +50,12 @@ body {
   align-items: center;
   display: flex;
   flex-direction: column;
-  font-family: var(--font-primary);
-  font-size: 1.3rem;
   justify-content: center;
   margin: 0;
   min-height: 100vh;
-  text-transform: capitalize;
+  /*font-family: var(--font-primary);*/
+  /*font-size: 1.3rem;*/
+  /*text-transform: capitalize;*/
 }
 
 img {
@@ -50,207 +67,378 @@ img {
   }
 }
 
-/*
-Layout Styles
-*/
+/* ========================================
+Layout
+======================================== */
 
 .pokedex {
-  background: linear-gradient(
-    190deg,
-    #e31818 0%,
-    #ea2f2f 30%,
-    #ff6b6b 40%,
-    #ea2f2f 60%,
-    #eb1717 90%
-  );
-  border-radius: 15px;
-  border: 10px double black;
   display: flex;
+  flex-direction: column;
+  min-height: var(--dex-height);
   margin-left: auto;
   margin-right: auto;
-  max-width: 960px;
-  padding: 1rem;
+  width: var(--dex-width);
 }
 
-.panel-left,
-.panel-right {
-  border-radius: 3px;
-  border: 3px inset #b31818;
-  flex: 1;
-  padding: 0.75rem;
-}
-
-.panel-hinge {
-  background-color: #6eeb83;
-  margin-left: 1.25rem;
-  margin-right: 1.25rem;
-  width: 1.875rem;
-}
-
-.panel-bar {
+.layout-header {
+  background-color: var(--background);
+  border-bottom: none !important; /* !important for sorting */
+  border-radius: var(--radius) var(--radius) 0 0;
+  border: var(--border) solid black;
   display: flex;
-  flex-direction: row;
-  gap: 0.25rem;
-  width: 100%;
+  padding: var(--gap);
+  width: var(--header-width);
+}
 
-  & > .box {
-    flex: 1;
-    margin-bottom: 0.5rem;
+.layout-panels {
+  background-color: var(--background);
+  border-radius: 0 var(--radius) var(--radius) var(--radius);
+  border: var(--border) solid black;
+  display: flex;
+  flex: 1;
+  height: 100%;
+}
+
+.layout-panel {
+  border: var(--border) solid black;
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  margin: var(--gap);
+  padding: calc(var(--gap) * 3);
+
+  &.lhs {
+    border-bottom-right-radius: 0;
+  }
+
+  &.rhs {
+    border-bottom-left-radius: 0;
   }
 }
 
-.box {
-  border-radius: 3px;
-  border: 3px inset #b31818;
-  padding: 0.5rem;
+.layout-spine {
+  border-left: var(--border) solid black;
+  border-right: var(--border) solid black;
+  flex: 0 0 var(--spine);
+}
 
-  &:not(:last-child) {
-    margin-bottom: 0.5rem;
+/* ========================================
+Utilities
+======================================== */
+
+.bg-blue {
+  background-color: blue !important;
+}
+
+.bg-red {
+  background-color: red !important;
+}
+
+.bg-yellow {
+  background-color: yellow !important;
+}
+
+.bg-green {
+  background-color: green !important;
+}
+
+/* ========================================
+Layout "Components"
+======================================== */
+
+.block:not(:last-child) {
+  margin-bottom: calc(var(--gap) * 2);
+}
+
+.dot {
+  --size: 10px;
+
+  background-color: var(--background);
+  border-radius: 50%;
+  border: 1px solid black;
+  height: var(--size);
+  width: var(--size);
+
+  &.is-med {
+    --size: 16px;
   }
 
-  &.is-flex {
-    display: flex;
+  &.is-big {
+    --size: 25px;
+  }
+}
 
-    &.is-spaced {
-      justify-content: space-between;
-      align-items: center;
+.button {
+  &.circle {
+    --size: 36px;
+    background-color: black;
+    border-radius: 50%;
+    height: var(--size);
+    width: var(--size);
+  }
+
+  &.pill {
+    background-color: black;
+    border-radius: 20px;
+    height: 8px;
+    width: 36px;
+  }
+}
+
+.info {
+  background-color: paleturquoise;
+  border-radius: var(--radius);
+  display: inline-flex;
+  padding: var(--gap);
+}
+
+#header {
+  .bar {
+    display: flex;
+    gap: var(--gap);
+  }
+
+  .button.circle {
+    --size: 46px;
+  }
+
+  .status {
+    display: flex;
+    flex-direction: row;
+    gap: var(--gap);
+  }
+}
+
+
+#d-pad {
+  display: grid;
+  gap: 0;
+  grid-template-columns: repeat(3, 25px);
+  grid-template-rows: repeat(3, 25px);
+  width: fit-content;
+
+  .btn {
+    background-color: #222;
+    border: 1px solid #111;
+
+    &.up {
+      border-radius: 4px 4px 0 0;
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    &.left {
+      border-radius: 4px 0 0 4px;
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    &.center {
+      grid-column: 2;
+      grid-row: 2;
+    }
+
+    &.right {
+      border-radius: 0 4px 4px 0;
+      grid-column: 3;
+      grid-row: 2;
+    }
+
+    &.down {
+      border-radius: 0 0 4px 4px;
+      grid-column: 2;
+      grid-row: 3;
     }
   }
 }
 
-/*
-Looks
-*/
+#preview {
+  border-radius: var(--radius);
+  background-color: lightgray;
+  padding: calc(var(--gap) * 2) calc(var(--gap) * 3);
+  /*margin-bottom: calc(var(--gap) * 2);*/
 
-#pokemon-image {
-  padding: 4rem;
-  height: 450px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-#pokemon-image img {
-  width: 100%;
-  height: auto;
-  max-height: 100%;
-  object-fit: contain;
-}
-
-#pokemon-stats {
-  > div {
+  .bar {
     display: flex;
-    justify-content: space-between;
+
+    &:first-child {
+      gap: var(--gap);
+      justify-content: center;
+    }
+
+    &:not(:last-child) {
+      margin-bottom: var(--gap);
+    }
+  }
+
+  .image {
+    aspect-ratio: 1;
+    background-color: darkgray;
+    border-radius: var(--radius);
+    border: var(--border) solid black;
+    padding: calc(var(--gap) * 2);
+    width: 100%;
+  }
+}
+
+#control {
+  display: flex;
+  flex: 1;
+
+  .column {
+    display: inline-flex;
+
+    &.lhs {
+      flex-direction: column;
+      flex: 2;
+    }
+
+    &.rhs {
+      align-items: center;
+      flex: 1;
+      justify-content: center;
+    }
+  }
+
+  .bar {
+    display: flex;
+
+    &:first-child {
+      align-items: center;
+      gap: calc(var(--gap) * 2);
+      margin-bottom: calc(var(--gap) * 2);
+    }
+
+    &:last-child {
+      flex: 1;
+    }
+  }
+
+  .info {
+    flex: 1;
+  }
+}
+
+#evolution {
+  --arrow: 1px;
+  --arrow-gap: 4px;
+  --image-size: calc((100% / 3) - (((var(--arrow) + (var(--arrow-gap) * 2)) * 2) / 3));
+
+  display: flex;
+
+  .arrow {
+    width: 1px;
+    background-color: red;
+    height: 100%;
+  }
+
+  .info {
+    align-items: flex-end;
+    flex: 1;
+    gap: var(--arrow-gap);
+  }
+
+  .poke-group {
     align-items: center;
+    display: flex;
+    flex: 0 0 var(--image-size);
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-direction: column;
+
+    .image {
+      width: 100%;
+    }
+
+    p {
+      font-size: 0.75rem;
+      margin: 2px;
+      text-align: center;
+    }
   }
 }
 
-#pokemon-effects {
-  margin-bottom: 0.5rem;
-  cursor: pointer;
-}
-
-#pokemon-text {
-  height: 120px;
-  overflow: hidden;
-}
-
-.bg-green {
-  background: linear-gradient(
-    190deg,
-    #54dc6a 0%,
-    #6eeb83 30%,
-    #b0ffc0 40%,
-    #6eeb83 60%,
-    #54dc6a 90%
-  );
-}
-
-.bg-grey {
-  background-color: #e8ebf7;
-}
-
-.evolution-box {
-  border: 3px inset #b31818;
-  flex: 1;
-  padding: 0.75rem;
-}
-
-.pill {
-  border-radius: 10px;
-  font-size: 20px;
-  padding: 0.25rem;
-  margin: 0.25rem;
-  background-color: white;
-  text-align: center;
-  border: 3px inset #b31818;
-  text-transform: uppercase;
-}
-
-.type {
-  border: 3px inset #b31818;
-  font-size: 20px;
-  padding: 0.25rem;
-  margin: 0.25rem;
-  background-color: white;
-  text-align: center;
-}
-
-.inlineBox {
+#button-grid {
+  border-radius: calc(var(--radius) + 1px);
   display: flex;
-  flex-direction: row;
-  justify-content: space-evenly;
-  align-items: center;
-}
+  flex-wrap: wrap;
 
-.effectbutton {
-  border: 3px inset #b31818;
-  border-radius: 50%;
-  text-align: center;
-  font-size: 15px;
-  padding: 0.25rem;
-  width: 2rem;
-  height: 2rem;
-  background-color: #f91c1c;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+  .square {
+    background-color: blue;
+    border: 1px solid black;
+    flex: 1 0 20%;
+    height: 40px;
 
-.effectbutton svg {
-  width: 20px;
-  height: 20px;
-}
+    &:nth-child(1) {
+      border-top-left-radius: var(--radius);
+    }
 
-.toggle {
-  border: 3px inset #b31818;
-  background-color: #f91c1c;
-  border-radius: 30px;
-  text-align: center;
-  font-size: 15px;
-  padding: 0.5rem;
-}
+    &:nth-child(5) {
+      border-top-right-radius: var(--radius);
+    }
 
-.evolution {
-  align-items: center;
-  background-color: #e8ebf7;
-  border: 3px inset #b31818;
-  display: flex;
-  height: 120px;
-  justify-content: center;
-  margin-top: 0.5rem;
-  width: 100%;
+    &:nth-child(6) {
+      border-bottom-left-radius: var(--radius);
+    }
 
-  & img {
-    width: 80%;
+    &:nth-child(10) {
+      border-bottom-right-radius: var(--radius);
+    }
   }
 }
 
-#evolution-bar {
+#pill-bar {
+  .bar {
+    display: flex;
+    flex-direction: row;
+    gap: var(--gap);
+    justify-content: right;
+  }
+}
+
+#button-moves {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--gap);
+
+
+  .bar {
+    border-radius: calc(var(--radius) + 1px);
+    display: flex;
+    flex-wrap: wrap;
+
+
+    .square {
+      background-color: blue;
+      border: 1px solid black;
+      aspect-ratio: 1;
+      width: 60px;
+      height: 40px;
+
+      &:nth-child(1) {
+        border-top-left-radius: var(--radius);
+        border-bottom-left-radius: var(--radius);
+      }
+
+      &:nth-child(2) {
+        border-top-right-radius: var(--radius);
+        border-bottom-right-radius: var(--radius);
+      }
+    }
+  }
+
+  .button.circle {
+    margin-left: auto;
+  }
+}
+
+#poke-info {
+  display: flex;
+  gap: var(--gap);
   flex: 1;
 
-  & p {
-    margin: 0;
-    padding: 0;
+  .info {
+    flex: 1;
   }
 }
