@@ -5,36 +5,65 @@
 
 const MAX_POKEMON = 151;
 
+const IMAGES = {
+  gif: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated",
+}
+
 const isValidId = (id) => {
   return id > 0 && id <= MAX_POKEMON;
 };
 
-const IMAGES = {
-  gif: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated",
+const getImageUrl = (id) => {
+  return `${IMAGES.gif}/${id}.gif`;
+};
+
+const clamp = (min, max, value) => {
+  return Math.min(max, Math.max(min, value));
 }
 
 // =============================================================================
 // Components
 // =============================================================================
 
-const Pokedex = {
+const App = {
   data() {
     return {
       pokemon: [],
     };
   },
 
+  methods: {
+    getName(id) {
+      return this.pokemon[id - 1]?.name || "";
+    },
+    prevPokemon(currentId) {
+      this.$router.push(`/pokemon/${clamp(1, MAX_POKEMON, currentId - 1)}`)
+    },
+    nextPokemon(currentId) {
+      this.$router.push(`/pokemon/${clamp(1, MAX_POKEMON, currentId + 1)}`)
+    },
+    viewPokemon(pokemonId) {
+      this.$router.push(`/pokemon/${clamp(1, MAX_POKEMON, pokemonId)}`)
+    },
+  },
+
+  created() {
+    this.pokemon = JSON.parse(localStorage.getItem("pokemon"));
+  },
+
+  template: `
+    <RouterView />
+  `,
+}
+
+const Pokedex = {
   computed: {
     currentId() {
       return parseInt(this.$route.params.id, 10);
     },
     currentPokemon() {
-      return this.pokemon[this.currentId - 1];
+      return this.$root.pokemon[this.currentId - 1];
     },
-  },
-
-  mounted() {
-    this.pokemon = JSON.parse(localStorage.getItem("pokemon"));
   },
 
   template: `
@@ -46,16 +75,21 @@ const Pokedex = {
       <div class="layout-panels">
         <div class="layout-panel lhs">
           <Preview :id="currentId"/>
-          <Control />
+          <Control :id="currentId"/>
         </div>
 
         <div class="layout-spine"></div>
 
         <div class="layout-panel rhs">
-          <Evolution/>
-          <ButtonGrid/>
-          <PillBar/>
-          <ButtonMoves/>
+          <Evolution
+            :pokemon1="currentPokemon.evolution[0]"
+            :pokemon2="currentPokemon.evolution[1]"
+            :pokemon3="currentPokemon.evolution[2]"
+          />
+
+          <ButtonGrid />
+          <PillBar />
+          <ButtonMoves />
           <PokeInfo/>
         </div>
       </div>
@@ -88,7 +122,7 @@ const Preview = {
   },
   computed: {
     imageUrl() {
-      return `${IMAGES.gif}/${this.id}.gif`;
+      return getImageUrl(this.id);
     },
   },
   template: `
@@ -110,6 +144,13 @@ const Preview = {
 };
 
 const Control = {
+  props: {
+    id: {
+      type: Number,
+      required: true,
+      validator: isValidId,
+    },
+  },
   template: `
     <div class="block" id="control">
       <div class="column lhs">
@@ -125,9 +166,9 @@ const Control = {
       <div class="column rhs">
         <div id="d-pad">
           <div class="btn up"></div>
-          <div class="btn left"></div>
+          <div class="btn left" @click="$root.prevPokemon(id)"></div>
           <div class="btn center"></div>
-          <div class="btn right"></div>
+          <div class="btn right" @click="$root.nextPokemon(id)"></div>
           <div class="btn down"></div>
         </div>
       </div>
@@ -136,32 +177,66 @@ const Control = {
 };
 
 const Evolution = {
+  props: {
+    pokemon1: {
+      type: Number,
+      required: true,
+    },
+    pokemon2: Number,
+    pokemon3: Number,
+  },
+
+  computed: {
+    pokemon1Name() {
+      return this.$root.getName(this.pokemon1)
+    },
+    pokemon2Name() {
+      return this.$root.getName(this.pokemon2)
+    },
+    pokemon3Name() {
+      return this.$root.getName(this.pokemon3)
+    },
+    pokemon1Image() {
+      return getImageUrl(this.pokemon1)
+    },
+    pokemon2Image() {
+      return getImageUrl(this.pokemon2)
+    },
+    pokemon3Image() {
+      return getImageUrl(this.pokemon3)
+    },
+  },
+
   template: `
     <div class="block" id="evolution">
       <div class="info">
         <div class="poke-group">
           <div class="image">
-            <img class="is-pixelated" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/1.gif">
+            <img class="is-pixelated" :src="pokemon1Image">
           </div>
-          <p>Bulbasaur</p>
+          <p v-text="pokemon1Name"/>
         </div>
 
         <div class="arrow"></div>
 
         <div class="poke-group">
-          <div class="image">
-            <img class="is-pixelated" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/2.gif">
+          <div class="image" v-if="pokemon2">
+            <img class="is-pixelated" :src="pokemon2Image">
           </div>
-          <p>Ivysaur</p>
+          <div class="pokeball" v-else/>
+
+          <p v-text="pokemon2Name"/>
         </div>
 
         <div class="arrow"></div>
 
         <div class="poke-group">
-          <div class="image">
-            <img class="is-pixelated" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/3.gif">
+          <div class="image" v-if="pokemon3">
+            <img class="is-pixelated" :src="pokemon3Image">
           </div>
-          <p>Venusaur</p>
+          <div class="pokeball" v-else/>
+
+          <p v-text="pokemon3Name"/>
         </div>
       </div>
     </div>
@@ -256,12 +331,6 @@ router.beforeEach((to, from) => {
     },
   };
 })
-
-const App = {
-  template: `
-    <RouterView />
-  `,
-}
 
 // =============================================================================
 // Entrypoint

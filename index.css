@@ -344,15 +344,16 @@ Layout "Components"
   }
 
   .poke-group {
-    align-items: center;
-    display: flex;
     flex: 0 0 var(--image-size);
-    flex-grow: 0;
-    flex-shrink: 0;
-    flex-direction: column;
 
     .image {
+      aspect-ratio: 1;
+      display: flex;
       width: 100%;
+
+      img {
+        object-fit: contain;
+      }
     }
 
     p {
