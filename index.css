@@ -29,7 +29,7 @@ Variables
   --header-width: calc((100% - var(--spine)) / 2 + var(--spine));
 
   --background: #eb1717;
-  /*--font-primary: "VT323", monospace;*/
+  --font-primary: "VT323", monospace;
 }
 
 /* ========================================
@@ -53,9 +53,9 @@ body {
   justify-content: center;
   margin: 0;
   min-height: 100vh;
-  /*font-family: var(--font-primary);*/
-  /*font-size: 1.3rem;*/
-  /*text-transform: capitalize;*/
+  font-family: var(--font-primary);
+  font-size: 1.3rem;
+  text-transform: capitalize;
 }
 
 img {
@@ -257,7 +257,6 @@ Layout "Components"
   border-radius: var(--radius);
   background-color: lightgray;
   padding: calc(var(--gap) * 2) calc(var(--gap) * 3);
-  /*margin-bottom: calc(var(--gap) * 2);*/
 
   .bar {
     display: flex;
