@@ -80,47 +80,11 @@ const Pokedex = {
     },
   },
   methods: {
-    async fetchDetails(id) {
-      const detailsResponse = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
-      const details = await detailsResponse.json();
 
-      const speciesResponse = await fetch(details.species.url);
-      const species = await speciesResponse.json();
-
-      const evolutionChainResponse = await fetch(species.evolution_chain.url);
-      const evoChain = await evolutionChainResponse.json();
-
-      const moves = details
-        .moves
-        .filter((move) => {
-          const VERSIONS = ["blue-japan", "red-blue", "red-green-japan"]
-
-          for (const vgd of move.version_group_details) {
-            if (VERSIONS.includes(vgd.version_group.name)) {
-              console.log("including move", move)
-              return true;
-            }
-          }
-
-          return false;
-        })
-        .map(m => m.move.name)
-
-      return {
-        id: details.id,
-        name: details.name,
-        flavor: species.flavor_text_entries[0].flavor_text,
-        typeA: details.types[0].type.name,
-        typeB: details.types[1]?.type?.name || null,
-        stats: transformStats(details.stats),
-        evolution: buildEvolutionChain(evoChain.chain),
-        moves,
-      };
-    },
     async fetchPokemon(id) {
       const promises = [];
 
-      for (let id = 1; id <= MAX_POKEMON; id++) {
+      for (let id = 1; id <= 1; id++) {
         promises.push(this.fetchDetails(id));
       }
 
@@ -179,11 +143,7 @@ const Pokedex = {
     },
   },
   mounted() {
-    if (localStorage.getItem("pokemon")) {
-      this.pokemon = JSON.parse(localStorage.getItem("pokemon"));
-    } else {
-      this.fetchPokemon();
-    }
+    this.fetchPokemon();
   },
   template: `
     <div class="pokedex">
@@ -301,12 +261,6 @@ const PokemonImage = {
     playCry() {
       this.$refs.audio.play();
     },
-  },
-  mounted() {
-    feather.replace();
-  },
-  updated() {
-    feather.replace();
   },
   template: `
     <div>
