@@ -390,11 +390,11 @@ const Control = {
       </div>
       <div class="column rhs">
         <div id="d-pad">
-          <div class="btn up"></div>
+          <div class="btn up" @click="$root.nextPokemon(id)"></div>
           <div class="btn left" @click="$root.prevPokemon(id)"></div>
           <div class="btn center"></div>
           <div class="btn right" @click="$root.nextPokemon(id)"></div>
-          <div class="btn down"></div>
+          <div class="btn down" @click="$root.prevPokemon(id)"></div>
         </div>
       </div>
     </div>
