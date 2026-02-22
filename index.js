@@ -1,4 +1,3 @@
-
 // =============================================================================
 // Utilities
 // =============================================================================
@@ -6,19 +5,149 @@
 const MAX_POKEMON = 151;
 
 const IMAGES = {
-  gif: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated",
+  animated: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated",
+  official: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork",
 }
+
+const TYPE_COLORS = {
+  normal: "#A8A878",
+  fire: "#F08030",
+  water: "#6890F0",
+  electric: "#F8D030",
+  grass: "#78C850",
+  ice: "#98D8D8",
+  fighting: "#C03028",
+  poison: "#A040A0",
+  ground: "#E0C068",
+  flying: "#A890F0",
+  psychic: "#F85888",
+  bug: "#A8B820",
+  rock: "#B8A038",
+  ghost: "#705898",
+  dragon: "#7038F8",
+  dark: "#705848",
+  steel: "#B8B8D0",
+  fairy: "#EE99AC",
+};
 
 const isValidId = (id) => {
   return id > 0 && id <= MAX_POKEMON;
 };
 
-const getImageUrl = (id) => {
-  return `${IMAGES.gif}/${id}.gif`;
+const getAnimatedImage = (id) => {
+  return `${IMAGES.animated}/${id}.gif`;
+};
+
+const getOfficialImage = (id) => {
+  return `${IMAGES.official}/${id}.png`;
 };
 
 const clamp = (min, max, value) => {
   return Math.min(max, Math.max(min, value));
+}
+
+// https://github.com/veekun/pokedex/issues/218#issuecomment-339841781
+const cleanText = (text) => {
+  text = text.replace('\f',       '\n');
+  text = text.replace('\u00ad\n', '');
+  text = text.replace('\u00ad',   '');
+  text = text.replace(' -\n',     ' - ');
+  text = text.replace('-\n',      '-');
+  text = text.replace('\n',       ' ');
+  return text;
+}
+
+const extractIdFromUrl = (url) => {
+  const parts = url.split("/").filter(Boolean);
+  return Number(parts[parts.length - 1]);
+};
+
+// =============================================================================
+// Resource Management
+// =============================================================================
+
+async function getJSON(url) {
+  const resp = await fetch(url);
+  const json = await resp.json();
+  return json;
+}
+
+async function fetchDetails(id) {
+  const details = await getJSON(`https://pokeapi.co/api/v2/pokemon/${id}`);
+  const species = await getJSON(details.species.url);
+  const evolution = await getJSON(species.evolution_chain.url);
+
+  // const moves = details
+  //   .moves
+  //   .filter((move) => {
+  //     const VERSIONS = ["blue-japan", "red-blue", "red-green-japan"]
+
+  //     for (const vgd of move.version_group_details) {
+  //       if (VERSIONS.includes(vgd.version_group.name)) {
+  //         console.log("including move", move)
+  //         return true;
+  //       }
+  //     }
+
+  //     return false;
+  //   })
+  //   .map(m => m.move.name)
+
+  // debugger
+
+  return {
+    id: details.id,
+    name: details.name,
+    typeA: details.types[0].type.name,
+    typeB: details.types[1]?.type?.name || null,
+    stats: transformStats(details.stats),
+    evolution: transformChain(evolution.chain),
+    flavor: extractFlavor(species.flavor_text_entries),
+    moves: [],
+    // _raw: {
+    //   details,
+    //   species,
+    // }
+  };
+}
+
+const transformStats = (statsData) => {
+  return statsData.map((stat) => ({
+    name: stat.stat.name,
+    value: stat.base_stat,
+  }));
+};
+
+const transformChain = (node) => {
+  const chain = [];
+
+  function traverse(currentNode) {
+    const id = extractIdFromUrl(currentNode.species.url);
+
+    if (id <= MAX_POKEMON) {
+      chain.push(id)
+    }
+
+    for (const node of currentNode.evolves_to) {
+      traverse(node);
+    }
+  }
+
+  traverse(node);
+
+  return chain;
+};
+
+const extractFlavor = (entries) => {
+  const englishEntries = entries.filter((entry) => {
+    return entry.language.name == "en"
+  });
+
+  if (englishEntries.length == 0) {
+    return "N/A"
+  }
+
+  return cleanText(englishEntries[0].flavor_text);
 }
 
 // =============================================================================
@@ -29,6 +158,8 @@ const App = {
   data() {
     return {
       pokemon: [],
+      loading: false,
+      failure: null,
     };
   },
 
@@ -45,10 +176,35 @@ const App = {
     viewPokemon(pokemonId) {
       this.$router.push(`/pokemon/${clamp(1, MAX_POKEMON, pokemonId)}`)
     },
+    async fetchPokemon(id) {
+      const promises = [];
+
+      for (let id = 1; id <= MAX_POKEMON; id++) {
+        promises.push(fetchDetails(id));
+      }
+
+      this.loading = true;
+      this.failure = null;
+
+      try {
+        this.pokemon = await Promise.all(promises);
+        this.loading = false;
+
+        localStorage.setItem("pokemon", JSON.stringify(this.pokemon));
+      } catch (error) {
+        console.error("Failed to fetch Pokemon:", error);
+        this.failure = error.message;
+        this.loading = false;
+      }
+    },
   },
 
   created() {
-    this.pokemon = JSON.parse(localStorage.getItem("pokemon"));
+    if (localStorage.getItem("pokemon")) {
+      this.pokemon = JSON.parse(localStorage.getItem("pokemon"));
+    } else {
+      this.fetchPokemon();
+    }
   },
 
   template: `
@@ -62,20 +218,26 @@ const Pokedex = {
       return parseInt(this.$route.params.id, 10);
     },
     currentPokemon() {
-      return this.$root.pokemon[this.currentId - 1];
+      return this.$root.pokemon[this.currentId - 1]
     },
   },
-
   template: `
-    <div class="pokedex">
+    <div class="pokedex" v-if="!$root.loading">
       <div class="layout-header">
-        <Header />
+        <Header :type="currentPokemon.typeA" />
       </div>
 
       <div class="layout-panels">
         <div class="layout-panel lhs">
-          <Preview :id="currentId"/>
-          <Control :id="currentId"/>
+          <Preview
+            :id="currentId"
+            :name="currentPokemon.name"
+          />
+
+          <Control
+            :id="currentId"
+            :text="currentPokemon.flavor"
+          />
         </div>
 
         <div class="layout-spine"></div>
@@ -90,7 +252,11 @@ const Pokedex = {
           <ButtonGrid />
           <PillBar />
           <ButtonMoves />
-          <PokeInfo/>
+
+          <PokeInfo
+            :id="currentId"
+            :stats="currentPokemon.stats"
+          />
         </div>
       </div>
     </div>
@@ -98,10 +264,23 @@ const Pokedex = {
 }
 
 const Header = {
+  props: {
+    type: {
+      type: String,
+      required: true,
+    },
+  },
+  computed: {
+    typeColor() {
+      return TYPE_COLORS[this.type];
+    },
+  },
   template: `
     <div class="block" id="header">
       <div class="bar">
-        <div class="button circle bg-blue"></div>
+        <div class="button circle"
+        :style="{backgroundColor: typeColor}">
+        </div>
         <div class="status">
           <div class="dot is-med bg-red" ></div>
           <div class="dot is-med bg-yellow" ></div>
@@ -119,10 +298,17 @@ const Preview = {
       required: true,
       validator: isValidId,
     },
+    name: {
+      type: String,
+      required: true,
+    },
   },
   computed: {
     imageUrl() {
-      return getImageUrl(this.id);
+      return getAnimatedImage(this.id);
+    },
+    formattedId() {
+      return `#${this.id.toString().padStart(3, "0")}`;
     },
   },
   template: `
@@ -138,6 +324,10 @@ const Preview = {
       </div>
       <div class="bar">
         <div class="dot is-big"></div>
+        <div class="name-id">
+          <span v-text="name"/>
+          <span v-text="formattedId"/>
+      </div>
       </div>
     </div>
   `,
@@ -150,17 +340,32 @@ const Control = {
       required: true,
       validator: isValidId,
     },
+    text: {
+      type: String,
+      required: true,
+    },
+  },
+  computed: {
+    cryUrl() {
+      return `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${this.id}.ogg`;
+    },
+  },
+    methods: {
+    playCry() {
+      this.$refs.audio.play();
+    },
   },
   template: `
     <div class="block" id="control">
       <div class="column lhs">
         <div class="bar">
-          <div class="button circle"></div>
+          <audio :src="cryUrl" ref="audio"/>
+          <div class="button circle" @click="playCry"></div>
           <div class="button pill bg-red"></div>
           <div class="button pill bg-blue"></div>
         </div>
         <div class="bar">
-          <div class="info"></div>
+          <div class="info" v-text="text"></div>
         </div>
       </div>
       <div class="column rhs">
@@ -197,13 +402,13 @@ const Evolution = {
       return this.$root.getName(this.pokemon3)
     },
     pokemon1Image() {
-      return getImageUrl(this.pokemon1)
+      return getAnimatedImage(this.pokemon1)
     },
     pokemon2Image() {
-      return getImageUrl(this.pokemon2)
+      return getAnimatedImage(this.pokemon2)
     },
     pokemon3Image() {
-      return getImageUrl(this.pokemon3)
+      return getAnimatedImage(this.pokemon3)
     },
   },
 
@@ -285,10 +490,40 @@ const ButtonMoves = {
 };
 
 const PokeInfo = {
+  props: {
+    id: {
+      type: Number,
+      required: true,
+      validator: isValidId,
+    },
+    stats: {
+      type: Object,
+      required: true,
+      validator(value) {
+        return Array.isArray(value);
+      },
+    },
+  },
+  computed: {
+    imageUrl() {
+      return getOfficialImage(this.id);
+    },
+  },
   template: `
     <div class="block" id="poke-info">
-      <div class="info"></div>
-      <div class="info"></div>
+      <div class="info">
+        <div class="stat-space">
+          <div v-for="stat in stats">
+            <span v-text="stat.name"/>
+            <span v-text="stat.value"/>
+          </div>
+        </div>
+      </div>
+      <div class="info">
+        <div class="image">
+          <img class="is-pixelated" :src="imageUrl"/>
+        </div>
+      </div>
     </div>
   `,
 };
