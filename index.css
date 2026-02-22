@@ -22,7 +22,7 @@ Variables
   --radius: 6px;
 
   --dex-height: 580px;
-  --dex-width: 760px;
+  --dex-width: 780px;
 
   --spine: 50px;
 
@@ -133,7 +133,7 @@ Utilities
 }
 
 .bg-red {
-  background-color: red !important;
+  background-color: #9a0000 !important;
 }
 
 .bg-yellow {
@@ -202,6 +202,10 @@ Layout "Components"
 
   .button.circle {
     --size: 46px;
+
+    &.has-glow {
+      box-shadow:  inset 0 0 0 4px white, 0 0 12px 4px currentColor;
+    }
   }
 
   .status {
@@ -330,7 +334,7 @@ Layout "Components"
   }
 
   .info {
-    flex: 1;
+    height: 90px;
   }
 }
 
@@ -445,6 +449,9 @@ Layout "Components"
 
   .button.circle {
     margin-left: auto;
+    &.has-glow {
+      box-shadow: 0 0 8px 4px currentColor;
+    }
   }
 }
 
@@ -457,6 +464,13 @@ Layout "Components"
     display: flex;
     flex: 1;
     flex-direction: column;
+    line-height: 1.5;
+
+    p {
+      font-size:var(--font-size);
+      font-weight: bold;
+      margin: 0px 0px 10px;
+    }
 
     .stat-space {
       > div {
