@@ -10,32 +10,34 @@ const IMAGES = {
 }
 
 const TYPE_COLORS = {
-  normal: "#A8A878",
-  fire: "#F08030",
-  water: "#6890F0",
-  electric: "#F8D030",
-  grass: "#78C850",
-  ice: "#98D8D8",
-  fighting: "#C03028",
-  poison: "#A040A0",
-  ground: "#E0C068",
-  flying: "#A890F0",
-  psychic: "#F85888",
-  bug: "#A8B820",
-  rock: "#B8A038",
-  ghost: "#705898",
-  dragon: "#7038F8",
-  dark: "#705848",
-  steel: "#B8B8D0",
-  fairy: "#EE99AC",
+  normal: "#C4C49A",
+  fire: "#FF6B1A",
+  water: "#4D7FFF",
+  electric: "#FFE000",
+  grass: "#5DDD2A",
+  ice: "#6EEAEA",
+  fighting: "#FF2020",
+  poison: "#CC33CC",
+  ground: "#F0C030",
+  flying: "#C4AAFF",
+  psychic: "#FF2277",
+  bug: "#AACC00",
+  rock: "#D4B840",
+  ghost: "#9B6FD4",
+  dragon: "#6622FF",
+  dark: "#8B6A5A",
+  steel: "#C8C8E8",
+  fairy: "#FF77CC",
 };
 
 const isValidId = (id) => {
   return id > 0 && id <= MAX_POKEMON;
 };
 
-const getAnimatedImage = (id) => {
-  return `${IMAGES.animated}/${id}.gif`;
+const getAnimatedImage = (id, { front = true, shiny = false } = {}) => {
+  const frontImage = front ? "" : "back/";
+  const shinyImage = shiny ? "shiny/" : "";
+  return `${IMAGES.animated}/${frontImage}${shinyImage}${id}.gif`;
 };
 
 const getOfficialImage = (id) => {
@@ -213,6 +215,12 @@ const App = {
 }
 
 const Pokedex = {
+  data() {
+    return {
+      front: true,
+      shiny: false,
+    };
+  },
   computed: {
     currentId() {
       return parseInt(this.$route.params.id, 10);
@@ -232,11 +240,15 @@ const Pokedex = {
           <Preview
             :id="currentId"
             :name="currentPokemon.name"
+            :front="front"
+            :shiny="shiny"
           />
 
           <Control
             :id="currentId"
             :text="currentPokemon.flavor"
+            @toggle-front="front = !front"
+            @toggle-shiny="shiny = !shiny"
           />
         </div>
 
@@ -251,7 +263,7 @@ const Pokedex = {
 
           <ButtonGrid />
           <PillBar />
-          <ButtonMoves />
+          <ButtonMoves :type="currentPokemon.typeB" />
 
           <PokeInfo
             :id="currentId"
@@ -279,7 +291,7 @@ const Header = {
     <div class="block" id="header">
       <div class="bar">
         <div class="button circle"
-        :style="{backgroundColor: typeColor}">
+        :class="{'has-glow': type}" :style="{backgroundColor: typeColor, color: typeColor}">
         </div>
         <div class="status">
           <div class="dot is-med bg-red" ></div>
@@ -302,10 +314,18 @@ const Preview = {
       type: String,
       required: true,
     },
+    front: {
+      type: Boolean,
+      default: true,
+    },
+    shiny: {
+      type: Boolean,
+      default: false,
+    },
   },
   computed: {
     imageUrl() {
-      return getAnimatedImage(this.id);
+      return getAnimatedImage(this.id, { front: this.front, shiny: this.shiny });
     },
     formattedId() {
       return `#${this.id.toString().padStart(3, "0")}`;
@@ -361,8 +381,8 @@ const Control = {
         <div class="bar">
           <audio :src="cryUrl" ref="audio"/>
           <div class="button circle" @click="playCry"></div>
-          <div class="button pill bg-red"></div>
-          <div class="button pill bg-blue"></div>
+          <div class="button pill bg-red" @click="$emit('toggle-shiny')"></div>
+          <div class="button pill bg-blue" @click="$emit('toggle-front')"></div>
         </div>
         <div class="bar">
           <div class="info" v-text="text"></div>
@@ -478,13 +498,26 @@ const PillBar = {
 };
 
 const ButtonMoves = {
+  props: {
+    type: {
+      type: String,
+      default: null,
+    },
+  },
+  computed: {
+    typeColor() {
+      return TYPE_COLORS[this.type] || "#000000";
+    },
+  },
   template: `
     <div class="block" id="button-moves">
       <div class="bar">
         <div class="square"></div>
         <div class="square"></div>
       </div>
-      <div class="button circle"></div>
+      <div class="button circle"
+      :class="{'has-glow': type}" :style="{backgroundColor: typeColor, color: typeColor}">
+      </div>
     </div>
   `,
 };
@@ -512,7 +545,9 @@ const PokeInfo = {
   template: `
     <div class="block" id="poke-info">
       <div class="info">
+        <p>Stats</p>
         <div class="stat-space">
+
           <div v-for="stat in stats">
             <span v-text="stat.name"/>
             <span v-text="stat.value"/>
@@ -520,6 +555,7 @@ const PokeInfo = {
         </div>
       </div>
       <div class="info">
+        <p>Official Artwork</p>
         <div class="image">
           <img class="is-pixelated" :src="imageUrl"/>
         </div>
