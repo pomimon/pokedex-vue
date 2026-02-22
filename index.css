@@ -18,7 +18,7 @@ Variables
 :root {
   --gap: 6px;
 
-  --border: 4px;
+  --border: 3.5px;
   --radius: 6px;
 
   --dex-height: 580px;
@@ -28,7 +28,7 @@ Variables
 
   --header-width: calc((100% - var(--spine)) / 2 + var(--spine));
 
-  --background: #eb1717;
+  --background: #FF0000;
   --font-primary: "VT323", monospace;
   --font-size: 16px;
 }
@@ -49,6 +49,9 @@ html {
 
 body {
   align-items: center;
+  background-image: url("landscape.png");
+  background-repeat: no-repeat;
+  background-size: cover;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -129,19 +132,19 @@ Utilities
 ======================================== */
 
 .bg-blue {
-  background-color: blue !important;
+  background-color: #5283c5 !important;
 }
 
 .bg-red {
-  background-color: #9a0000 !important;
+  background-color: #CC0000 !important;
 }
 
 .bg-yellow {
-  background-color: yellow !important;
+  background-color: #fbff5b !important;
 }
 
 .bg-green {
-  background-color: green !important;
+  background-color: #13b413 !important;
 }
 
 /* ========================================
@@ -173,14 +176,15 @@ Layout "Components"
 .button {
   &.circle {
     --size: 36px;
-    background-color: black;
+    background-color: #222;
     border-radius: 50%;
     height: var(--size);
     width: var(--size);
   }
 
   &.pill {
-    background-color: black;
+    background-color: #222;
+    border: 1px solid black;
     border-radius: 20px;
     height: 8px;
     width: 36px;
@@ -190,6 +194,7 @@ Layout "Components"
 .info {
   background-color: paleturquoise;
   border-radius: var(--radius);
+  border: 1px solid black;
   display: inline-flex;
   padding: var(--gap);
 }
@@ -260,7 +265,8 @@ Layout "Components"
 
 #preview {
   border-radius: var(--radius);
-  background-color: lightgray;
+  border: 1px solid black;
+  background-color: #f2f2f2;
   padding: calc(var(--gap) * 2) calc(var(--gap) * 3);
 
   .bar {
@@ -278,16 +284,19 @@ Layout "Components"
     }
 
     .name-id {
+      display: flex;
       font-size: 20px;
       font-weight: bold;
-      display: flex;
       gap: calc(var(--gap) * 2);
+      letter-spacing: 0.6px;
+      text-transform: capitalize;
     }
   }
 
   .image {
     aspect-ratio: 1;
-    background-color: darkgray;
+    background-image: url("landscape.png");
+    background-size: cover;
     border-radius: var(--radius);
     border: var(--border) solid black;
     display: flex;
@@ -334,7 +343,10 @@ Layout "Components"
   }
 
   .info {
+    background-color: #86f17e;
     height: 90px;
+    letter-spacing: 0.6px;
+
   }
 }
 
@@ -346,13 +358,14 @@ Layout "Components"
   display: flex;
 
   .arrow {
-    width: 1px;
-    background-color: red;
+    background-color: black;
     height: 100%;
+    width: 1px;
   }
 
   .info {
     align-items: flex-end;
+    background-color: #003526;
     flex: 1;
     gap: var(--arrow-gap);
   }
@@ -371,7 +384,9 @@ Layout "Components"
     }
 
     p {
-      font-size: 0.75rem;
+      color: whitesmoke;
+      font-size: var(--font-size);
+      letter-spacing: 0.6px;
       margin: 2px;
       text-align: center;
     }
@@ -384,7 +399,7 @@ Layout "Components"
   flex-wrap: wrap;
 
   .square {
-    background-color: blue;
+    background-color: #00c5ff;
     border: 1px solid black;
     flex: 1 0 20%;
     height: 40px;
@@ -417,8 +432,8 @@ Layout "Components"
 }
 
 #button-moves {
-  display: flex;
   align-items: flex-end;
+  display: flex;
   gap: var(--gap);
 
 
@@ -429,11 +444,11 @@ Layout "Components"
 
 
     .square {
-      background-color: blue;
-      border: 1px solid black;
       aspect-ratio: 1;
-      width: 60px;
+      background-color: #f2f2f2;
+      border: 1px solid black;
       height: 40px;
+      width: 60px;
 
       &:nth-child(1) {
         border-top-left-radius: var(--radius);
@@ -461,23 +476,28 @@ Layout "Components"
   flex: 1;
 
   .info {
+    background-color: #003526;
     display: flex;
     flex: 1;
     flex-direction: column;
-    line-height: 1.5;
+    line-height: 1.35rem;
+    letter-spacing: 0.6px;
 
     p {
-      font-size:var(--font-size);
+      color: whitesmoke;
+      font-size: 18px;
       font-weight: bold;
       margin: 0px 0px 10px;
     }
 
     .stat-space {
       > div {
+        align-items: center;
+        color: whitesmoke;
         display: flex;
         justify-content: space-between;
-        align-items: center;
       }
     }
   }
 }
+
