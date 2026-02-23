@@ -506,7 +506,7 @@ const ButtonMoves = {
   },
   computed: {
     typeColor() {
-      return TYPE_COLORS[this.type] || "#000000";
+      return TYPE_COLORS[this.type] || "#222";
     },
   },
   template: `
