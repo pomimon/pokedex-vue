@@ -49,7 +49,7 @@ html {
 
 body {
   align-items: center;
-  background-image: url("landscape.png");
+  background-image: url("landscape-c.png");
   background-repeat: no-repeat;
   background-size: cover;
   display: flex;
@@ -319,7 +319,7 @@ Layout "Components"
 
   .image {
     aspect-ratio: 1;
-    background-image: url("landscape.png");
+    background-image: url("landscape-c.png");
     background-size: cover;
     border-radius: var(--radius);
     border: var(--border) solid black;
