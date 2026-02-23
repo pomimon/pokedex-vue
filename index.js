@@ -252,7 +252,9 @@ const Pokedex = {
           />
         </div>
 
-        <div class="layout-spine"></div>
+        <div class="layout-spine">
+        <Spine />
+        </div>
 
         <div class="layout-panel rhs">
           <Evolution
@@ -564,6 +566,20 @@ const PokeInfo = {
   `,
 };
 
+const Spine = {
+  template: `
+<div id="spine">
+  <div class="hinge">
+    <div class="hinge-line"></div>
+    <div class="hinge-line"></div>
+  </div>
+  <div class="hinge">
+    <div class="hinge-line"></div>
+    <div class="hinge-line"></div>
+  </div>
+</div>
+  `,
+};
 
 // =============================================================================
 // Vue Setup
@@ -616,5 +632,6 @@ Vue.createApp(App)
   .component("PillBar", PillBar)
   .component("PokeInfo", PokeInfo)
   .component("Preview", Preview)
+  .component("Spine", Spine)
   .use(router)
   .mount("#app");

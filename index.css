@@ -126,6 +126,7 @@ Layout
   border-left: var(--border) solid black;
   border-right: var(--border) solid black;
   flex: 0 0 var(--spine);
+  padding: 35px 0px;
 }
 
 /* ========================================
@@ -528,3 +529,22 @@ Layout "Components"
   }
 }
 
+#spine {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+
+  .hinge {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .hinge-line {
+    background-color: black;
+    border-radius: 2px;
+    height: 3px;
+    width: 100%;
+  }
+}
